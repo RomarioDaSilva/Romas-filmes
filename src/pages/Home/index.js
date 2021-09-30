@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, ActivityIndicator } from "react-native";
 import {
   Container,
   SearchContainer,
@@ -15,15 +15,22 @@ import Header from "../../components/Header";
 import SliderItem from "../../components/SliderItem";
 import { Feather } from "@expo/vector-icons";
 import api, { key } from "../../services/api";
-import { getlistmovies } from '../../utils/movie';
+import { getlistmovies, randomBanner } from '../../utils/movie';
+import { useNavigation } from "@react-navigation/native"; 
 
 export default function Home() {
+
+
   const [nowMovies, setNowMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  const [bannerMovies, setBannerMovies] = useState({});
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     let isActive = true;
+    const ac = new AbortController();
 
     async function getMovies() {
       const [nowData, popularData, topData] = await Promise.all([
@@ -50,19 +57,43 @@ export default function Home() {
         }),
       ]);
 
-      const nowList = getlistmovies(5, nowData.data.results);
-      const popularList = getlistmovies(5, popularData.data.results);
-      const topList = getlistmovies(5, topData.data.results);
+      if(isActive){
+        const nowList = getlistmovies(5, nowData.data.results);
+        const popularList = getlistmovies(5, popularData.data.results);
+        const topList = getlistmovies(5, topData.data.results);
 
-      setNowMovies(nowList);
-      setPopularMovies(popularList);
-      setTopMovies(topList);
+        setBannerMovies(nowData.data.results[randomBanner(nowData.data.results)])
+  
+        setNowMovies(nowList);
+        setPopularMovies(popularList);
+        setTopMovies(topList);
+  
+        setLoading(false);
+      }
 
     }
 
     getMovies();
+
+    //desmontar component
+    return () => {
+      isActive = false;
+      ac.abort();
+    }
+
   }, []);
 
+  function navigateDetailsPage(item){
+    navigation.navigate('Detail', {id: item.id })
+  }
+
+  if(loading){
+    return(
+      <Container>
+        <ActivityIndicator size="large" color="#FFF" />
+      </Container>
+    )
+  }
   return (
     <Container>
       <Header title="React Prime" />
@@ -76,11 +107,11 @@ export default function Home() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <Title>Em Cartaz</Title>
-        <BannerBtn activeOpacity={0.9} onPress={() => alert("teste")}>
+        <BannerBtn activeOpacity={0.9} onPress={() => navigateDetailsPage(bannerMovies) }>
           <Banner
             resizeMethod="resize"
             source={{
-              uri: "https://images.unsplash.com/photo-1624817670169-57a1245cf3f1?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=765&q=80",
+              uri: `https://image.tmdb.org/t/p/original/${bannerMovies.poster_path}` ,
             }}
           />
         </BannerBtn>
@@ -89,7 +120,7 @@ export default function Home() {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={nowMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navigateDetailsPage(item)} />}
           keyExtractor={ (item) => String(item.id) }
         />
 
@@ -98,7 +129,7 @@ export default function Home() {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={popularMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navigateDetailsPage(item)} />}
           keyExtractor={ (item) => String(item.id) }
         />
 
@@ -107,7 +138,7 @@ export default function Home() {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={topMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navigateDetailsPage(item)} />}
           keyExtractor={ (item) => String(item.id) }
         />
       </ScrollView>

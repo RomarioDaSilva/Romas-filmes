@@ -33,11 +33,9 @@ function StackRoutes() {
         options={{
           title: "Sua busca",
           headerTintColor: "#FFF",
-          
           headerTitleStyle: {
             color: "#FFF",
           },
-
           headerStyle: {
             backgroundColor: "#141a29",
           },

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ScrollView, ActivityIndicator } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
+import Header from "../../components/Header";
+import SliderItem from "../../components/SliderItem";
+import api, { key } from "../../services/api";
+import { getlistmovies, randomBanner } from "../../utils/movie";
 import {
   Container,
   SearchContainer,
@@ -11,20 +18,14 @@ import {
   SliderMovie,
 } from "./styles";
 
-import Header from "../../components/Header";
-import SliderItem from "../../components/SliderItem";
-import { Feather } from "@expo/vector-icons";
-import api, { key } from "../../services/api";
-import { getlistmovies, randomBanner } from "../../utils/movie";
-import { useNavigation } from "@react-navigation/native";
-
 export default function Home() {
+  const navigation = useNavigation();
+
   const [nowMovies, setNowMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
   const [bannerMovies, setBannerMovies] = useState({});
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
   const [input, setInput] = useState("");
 
   useEffect(() => {
@@ -68,7 +69,6 @@ export default function Home() {
         setNowMovies(nowList);
         setPopularMovies(popularList);
         setTopMovies(topList);
-
         setLoading(false);
       }
     }
@@ -111,6 +111,7 @@ export default function Home() {
           value={input}
           onChangeText={(text) => setInput(text)}
         />
+
         <SearchBtn onPress={handleSearcMovie}>
           <Feather name="search" size={30} color="#FFF" />
         </SearchBtn>
@@ -144,6 +145,7 @@ export default function Home() {
         />
 
         <Title>Populares</Title>
+
         <SliderMovie
           horizontal={true}
           showsHorizontalScrollIndicator={false}
@@ -158,6 +160,7 @@ export default function Home() {
         />
 
         <Title>Mais Votados</Title>
+        
         <SliderMovie
           horizontal={true}
           showsHorizontalScrollIndicator={false}

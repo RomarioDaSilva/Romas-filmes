@@ -15,7 +15,7 @@
 
 
 ### 📝 - Descrição
-.
+Projeto desenvolvido apenas para fins de estudo e crescimento.
 .
 .
 
